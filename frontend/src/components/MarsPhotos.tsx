@@ -62,7 +62,7 @@ const MarsPhotos: React.FC = () => {
       
       const result = await response.json();
       if (result.success && result.data) {
-        setPhotos(result.data.photos.slice(0, 12)); // Limit to 12 photos for better performance
+        setPhotos(result.data.photos.slice(0, 12)); 
       } else {
         throw new Error(result.error?.message || 'Failed to fetch Mars photos');
       }
@@ -87,7 +87,6 @@ const MarsPhotos: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto animate-slide-up space-y-6">
-      {/* Controls */}
       <div className="bg-slate-800/30 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6">
         <div className="grid md:grid-cols-4 gap-4">
           <div>
@@ -152,7 +151,6 @@ const MarsPhotos: React.FC = () => {
         </div>
       </div>
 
-      {/* Photos Grid */}
       {photos.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {photos.map((photo) => (

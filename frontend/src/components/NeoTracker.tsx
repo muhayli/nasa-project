@@ -77,18 +77,15 @@ const NeoTracker: React.FC = () => {
     return <ErrorMessage message="No data available" onRetry={fetchNeoData} />;
   }
 
-  // Process data for visualization
   const allObjects: NearEarthObject[] = Object.values(neoData.near_earth_objects).flat();
   const hazardousCount = allObjects.filter(obj => obj.is_potentially_hazardous_asteroid).length;
   
-  // Group by date for chart
   const chartData = Object.entries(neoData.near_earth_objects).map(([date, objects]) => ({
     date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     total: objects.length,
     hazardous: objects.filter(obj => obj.is_potentially_hazardous_asteroid).length,
   }));
 
-  // Sort objects by closest approach
   const sortedObjects = allObjects
     .map(obj => ({
       ...obj,
@@ -102,7 +99,6 @@ const NeoTracker: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto animate-slide-up space-y-6">
-      {/* Summary Cards */}
       <div className="grid md:grid-cols-3 gap-6">
         <div className="bg-slate-800/30 backdrop-blur-md rounded-xl border border-slate-700/50 p-6">
           <div className="flex items-center gap-3 mb-2">
@@ -137,7 +133,6 @@ const NeoTracker: React.FC = () => {
         </div>
       </div>
 
-      {/* Chart */}
       <div className="bg-slate-800/30 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6">
         <h3 className="text-xl font-semibold text-white mb-6">Near-Earth Objects by Date</h3>
         <ResponsiveContainer width="100%" height={300}>
@@ -158,7 +153,6 @@ const NeoTracker: React.FC = () => {
         </ResponsiveContainer>
       </div>
 
-      {/* Object List */}
       <div className="bg-slate-800/30 backdrop-blur-md rounded-2xl border border-slate-700/50 p-6">
         <h3 className="text-xl font-semibold text-white mb-6">Closest Approaching Objects</h3>
         <div className="space-y-4">
