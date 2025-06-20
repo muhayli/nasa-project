@@ -54,8 +54,8 @@ A beautiful, full-stack web application that explores the cosmos using real NASA
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd nasa-space-explorer
+   git clone https://github.com/muhayli/nasa-project.git
+   cd nasa-project
    ```
 
 2. **Install dependencies for all packages**
