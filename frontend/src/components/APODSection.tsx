@@ -1,56 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, ExternalLink, Info } from 'lucide-react';
-import LoadingSpinner from './LoadingSpinner';
-import ErrorMessage from './ErrorMessage';
-
-interface APODData {
-  title: string;
-  explanation: string;
-  url: string;
-  hdurl?: string;
-  media_type: string;
-  date: string;
-  copyright?: string;
-}
+import React, { useState } from "react";
+import { Calendar, ExternalLink, Info } from "lucide-react";
+import LoadingSpinner from "./LoadingSpinner";
+import ErrorMessage from "./ErrorMessage";
+import { useAPOD } from "../hooks/useNasaApi";
 
 const APODSection: React.FC = () => {
-  const [apodData, setApodData] = useState<APODData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-
-  const fetchAPOD = async (date?: string) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const url = date ? `/api/apod?date=${date}` : '/api/apod';
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch APOD data');
-      }
-      
-      const result = await response.json();
-      if (result.success && result.data) {
-        setApodData(result.data);
-      } else {
-        throw new Error(result.error?.message || 'Failed to fetch APOD data');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
+  //if no data for today, show yesterday's date by default
+  const getDefaultDate = () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString().split("T")[0];
   };
 
-  useEffect(() => {
-    fetchAPOD();
-  }, []);
+  const [selectedDate, setSelectedDate] = useState(getDefaultDate());
+
+  const {
+    data: apodData,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useAPOD(selectedDate);
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
-    fetchAPOD(date);
   };
 
   if (loading) {
@@ -58,28 +30,36 @@ const APODSection: React.FC = () => {
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={() => fetchAPOD()} />;
+    return (
+      <ErrorMessage
+        message={error instanceof Error ? error.message : "An error occurred"}
+        onRetry={() => refetch()}
+      />
+    );
   }
 
   if (!apodData) {
-    return <ErrorMessage message="No data available" onRetry={() => fetchAPOD()} />;
+    return (
+      <ErrorMessage message="No data available" onRetry={() => refetch()} />
+    );
   }
 
   return (
     <div className="max-w-6xl mx-auto animate-slide-up">
       <div className="bg-slate-800/30 backdrop-blur-md rounded-2xl border border-slate-700/50 overflow-hidden shadow-2xl">
-        {/* Header */}
         <div className="p-6 border-b border-slate-700/50">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-2">{apodData.title}</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {apodData.title}
+              </h2>
               <p className="text-slate-300 flex items-center gap-2">
                 <Calendar size={16} />
-                {new Date(apodData.date).toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
+                {new Date(apodData.date).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
                 })}
               </p>
             </div>
@@ -88,7 +68,7 @@ const APODSection: React.FC = () => {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => handleDateChange(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
+                max={new Date().toISOString().split("T")[0]}
                 min="1995-06-16"
                 className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-nebula-500 focus:border-transparent"
               />
@@ -106,13 +86,11 @@ const APODSection: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Content */}
         <div className="p-6">
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Image/Video */}
             <div className="space-y-4">
-              {apodData.media_type === 'image' ? (
+              {apodData.media_type === "image" ? (
                 <div className="relative group">
                   <img
                     src={apodData.url}
@@ -132,7 +110,7 @@ const APODSection: React.FC = () => {
                   />
                 </div>
               )}
-              
+
               {apodData.copyright && (
                 <p className="text-sm text-slate-400 text-center">
                   © {apodData.copyright}
@@ -140,13 +118,19 @@ const APODSection: React.FC = () => {
               )}
             </div>
 
-            {/* Description */}
             <div className="space-y-6">
               <div className="flex items-start gap-3">
-                <Info className="text-cosmic-400 mt-1 flex-shrink-0" size={20} />
+                <Info
+                  className="text-cosmic-400 mt-1 flex-shrink-0"
+                  size={20}
+                />
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3">About This Image</h3>
-                  <p className="text-slate-300 leading-relaxed">{apodData.explanation}</p>
+                  <h3 className="text-lg font-semibold text-white mb-3">
+                    About This Image
+                  </h3>
+                  <p className="text-slate-300 leading-relaxed">
+                    {apodData.explanation}
+                  </p>
                 </div>
               </div>
             </div>

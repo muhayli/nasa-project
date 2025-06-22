@@ -1,80 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { AlertTriangle, Calendar, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
-
-interface NearEarthObject {
-  id: string;
-  name: string;
-  nasa_jpl_url: string;
-  absolute_magnitude_h: number;
-  estimated_diameter: {
-    kilometers: {
-      estimated_diameter_min: number;
-      estimated_diameter_max: number;
-    };
-  };
-  is_potentially_hazardous_asteroid: boolean;
-  close_approach_data: Array<{
-    close_approach_date: string;
-    relative_velocity: {
-      kilometers_per_hour: string;
-    };
-    miss_distance: {
-      kilometers: string;
-    };
-  }>;
-}
-
-interface NeoData {
-  near_earth_objects: Record<string, NearEarthObject[]>;
-  element_count: number;
-}
+import { useNearEarthObjects } from '../hooks/useNasaApi';
 
 const NeoTracker: React.FC = () => {
-  const [neoData, setNeoData] = useState<NeoData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchNeoData = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch('/api/neo');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch NEO data');
-      }
-      
-      const result = await response.json();
-      if (result.success && result.data) {
-        setNeoData(result.data);
-      } else {
-        throw new Error(result.error?.message || 'Failed to fetch NEO data');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchNeoData();
-  }, []);
+  const { data: neoData, isLoading: loading, error, refetch } = useNearEarthObjects();
 
   if (loading) {
     return <LoadingSpinner message="Tracking near-Earth objects..." />;
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={fetchNeoData} />;
+    return <ErrorMessage message={error instanceof Error ? error.message : 'An error occurred'} onRetry={() => refetch()} />;
   }
 
   if (!neoData) {
-    return <ErrorMessage message="No data available" onRetry={fetchNeoData} />;
+    return <ErrorMessage message="No data available" onRetry={() => refetch()} />;
   }
 
   const allObjects: NearEarthObject[] = Object.values(neoData.near_earth_objects).flat();

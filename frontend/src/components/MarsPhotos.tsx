@@ -1,30 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Camera, Filter, Calendar } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
-
-interface MarsPhoto {
-  id: number;
-  img_src: string;
-  earth_date: string;
-  rover: {
-    name: string;
-    status: string;
-  };
-  camera: {
-    name: string;
-    full_name: string;
-  };
-}
-
+import { useMarsPhotos } from '../hooks/useNasaApi';
 
 const MarsPhotos: React.FC = () => {
-  const [photos, setPhotos] = useState<MarsPhoto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedRover, setSelectedRover] = useState('curiosity');
   const [selectedCamera, setSelectedCamera] = useState('');
   const [sol, setSol] = useState('1000');
+  
+  const { data: photosData, isLoading: loading, error, refetch } = useMarsPhotos(selectedRover, sol, selectedCamera || undefined);
+  const photos = photosData?.photos?.slice(0, 12) || [];
 
   const rovers = [
     { id: 'curiosity', name: 'Curiosity' },
@@ -44,45 +30,13 @@ const MarsPhotos: React.FC = () => {
     { id: 'navcam', name: 'Navigation Camera' },
   ];
 
-  const fetchMarsPhotos = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      let url = `/api/mars-photos?rover=${selectedRover}&sol=${sol}`;
-      if (selectedCamera) {
-        url += `&camera=${selectedCamera}`;
-      }
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch Mars photos');
-      }
-      
-      const result = await response.json();
-      if (result.success && result.data) {
-        setPhotos(result.data.photos.slice(0, 12)); 
-      } else {
-        throw new Error(result.error?.message || 'Failed to fetch Mars photos');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedRover, selectedCamera, sol]);
-
-  useEffect(() => {
-    fetchMarsPhotos();
-  }, [selectedRover, selectedCamera, sol, fetchMarsPhotos]);
 
   if (loading) {
     return <LoadingSpinner message="Loading Mars photos..." />;
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={fetchMarsPhotos} />;
+    return <ErrorMessage message={error instanceof Error ? error.message : 'An error occurred'} onRetry={() => refetch()} />;
   }
 
   return (
@@ -142,7 +96,7 @@ const MarsPhotos: React.FC = () => {
           
           <div className="flex items-end">
             <button
-              onClick={fetchMarsPhotos}
+              onClick={() => refetch()}
               className="w-full px-4 py-2 bg-nebula-600 hover:bg-nebula-700 text-white rounded-lg transition-colors font-medium"
             >
               Search Photos
