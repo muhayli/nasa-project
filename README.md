@@ -1,6 +1,6 @@
 # 🚀 NASA Space Explorer
 
-A beautiful, full-stack web application that explores the cosmos using real NASA APIs. Built with React, Node.js, and Express, this application provides an immersive experience for discovering space-related data including astronomy pictures, Mars rover photos, and near-Earth object tracking.
+A full-stack web application that explores the cosmos using real NASA APIs. Built with React, Node.js, and Express, this application provides an immersive experience for discovering space-related data including astronomy pictures, Mars rover photos, and near-Earth object tracking.
 
 ## ✨ Features
 
