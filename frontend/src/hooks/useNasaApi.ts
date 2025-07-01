@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.PROD ? 'https://nasa-project-cggf.onrender.com/api' : '/api';
 
 interface APIResponse<T> {
   success: boolean;
