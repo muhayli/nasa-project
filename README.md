@@ -2,6 +2,9 @@
 
 A full-stack web application that explores the cosmos using real NASA APIs. Built with React, Node.js, and Express, this application provides an immersive experience for discovering space-related data including astronomy pictures, Mars rover photos, and near-Earth object tracking.
 
+## 🌐 Live Demo
+**Live URL:** [https://nasa-theta-lilac.vercel.app/](https://nasa-theta-lilac.vercel.app/)
+
 ## ✨ Features
 
 ### 🌟 Astronomy Picture of the Day (APOD)
