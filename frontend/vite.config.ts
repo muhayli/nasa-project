@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://nasa-project-cggf.onrender.com/',
+        target: 'https://nasa-project-cggf.onrender.com',
         changeOrigin: true,
       },
     },
